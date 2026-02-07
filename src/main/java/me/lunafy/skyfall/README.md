@@ -1,4 +1,5 @@
 # Todo
+## All to-do items have their development priorities listed in brackets
 - Add ding noise during countdown [LOW]
 - Add win condition checks [HIGH]
 - Regenerate the world for each new game [MEDIUM]
