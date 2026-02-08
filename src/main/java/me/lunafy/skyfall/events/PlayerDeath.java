@@ -6,22 +6,18 @@ import me.lunafy.skyfall.game.GameState;
 import me.lunafy.skyfall.player.PlayerManager;
 import me.lunafy.skyfall.player.SkyfallPlayer;
 import me.lunafy.skyfall.util.StringHelpers;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.util.StringUtil;
 
 public class PlayerDeath implements Listener {
-    private final Skyfall plugin;
     private final PlayerManager playerManager;
     private final GameManager gameManager;
 
     public PlayerDeath(Skyfall plugin)
     {
-        this.plugin = plugin;
         this.playerManager = plugin.getPlayerManager();
         this.gameManager = plugin.getGameManager();
     }
@@ -40,12 +36,11 @@ public class PlayerDeath implements Listener {
         event.getDrops().clear();
         event.setDroppedExp(0);
 
+        // Update their SkyfallPlayer object
         player.setAlive(false);
 
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            bukkitPlayer.spigot().respawn();
-            bukkitPlayer.setGameMode(GameMode.SPECTATOR);
-        });
+        bukkitPlayer.spigot().respawn();
+        bukkitPlayer.setGameMode(GameMode.SPECTATOR);
 
         Player killer = bukkitPlayer.getKiller();
 
@@ -60,7 +55,8 @@ public class PlayerDeath implements Listener {
             ));
         }
 
-        // call win check
+        // Call win check
+        gameManager.checkWinConditions();
     }
 
 }

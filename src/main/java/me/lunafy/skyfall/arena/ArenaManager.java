@@ -1,10 +1,16 @@
 package me.lunafy.skyfall.arena;
 
 import org.bukkit.*;
+import org.bukkit.entity.Player;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.util.Vector;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -12,8 +18,42 @@ public class ArenaManager {
     private World arenaWorld;
     private final List<Location> pillars = new ArrayList<>();
 
+    private void evacuateWorld(World world)
+    {
+        World lobby = Bukkit.getWorld("world");
+
+        for(Player player : world.getPlayers())
+        {
+            player.teleport(lobby.getSpawnLocation());
+        }
+    }
+
     public void generateArena(int playerCount)
     {
+        File worldFolder = new File(Bukkit.getWorldContainer(), "SkyfallArena");
+
+        // Delete the existing world
+        if(worldFolder.exists())
+        {
+            World skyfallArena = Bukkit.getWorld("SkyfallArean");
+
+            if(skyfallArena != null)
+            {
+                evacuateWorld(skyfallArena);
+                Bukkit.unloadWorld(skyfallArena, false);
+            }
+
+            try
+            {
+                Files.walk(worldFolder.toPath())
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         WorldCreator wc = new WorldCreator("SkyfallArena");
         wc.environment(World.Environment.NORMAL);
         wc.generator(new VoidWorldGenerator());

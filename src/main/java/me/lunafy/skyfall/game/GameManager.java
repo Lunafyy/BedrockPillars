@@ -18,6 +18,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class GameManager {
@@ -110,6 +112,13 @@ public class GameManager {
 
     public void endMatch(SkyfallPlayer winner)
     {
+        if(winner != null)
+        {
+            playerManager.announceMessage(StringHelpers.format(
+                    "<gold>" + winner.getBukkitPlayer().getName() + "</gold>"
+                    + "<green> is the winner!</green>"
+            ));
+        }
         state = GameState.ENDING;
         // announce winner
         // cleanup
@@ -149,6 +158,16 @@ public class GameManager {
         }, 20L, 20L);
 
         return true;
+    }
+
+    public void checkWinConditions()
+    {
+        List<SkyfallPlayer> alive = new ArrayList<>(playerManager.getAlivePlayers());
+
+        if(alive.size() <= 1)
+        {
+            endMatch(alive.isEmpty() ? null : alive.getFirst());
+        }
     }
 
     public void updateState(GameState newState)
