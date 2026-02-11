@@ -6,6 +6,7 @@ import me.lunafy.skyfall.game.GameState;
 import me.lunafy.skyfall.player.PlayerManager;
 import me.lunafy.skyfall.player.SkyfallPlayer;
 import me.lunafy.skyfall.util.StringHelpers;
+import org.bukkit.Location;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,12 +34,18 @@ public class PlayerDamageEvent implements Listener {
         if(!sfPlayer.isAlive()) return; // If we already consider them dead, ignore it
         if(e.getCause() != EntityDamageEvent.DamageCause.VOID) return; // If it wasn't to the void, ignore it
 
+        player.teleport(new Location(player.getWorld(), 0, 74, 0)); // Middle of all pillars, at the same height
+
         sfPlayer.setAlive(false);
 
         player.getInventory().clear();
 
+        e.setCancelled(true);
+
         playerManager.announceMessage(StringHelpers.format(
                 "<red>" + player.getName() + " has been eliminated</red>"
         ));
+
+        gameManager.checkWinConditions();
     }
 }

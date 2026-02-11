@@ -4,7 +4,7 @@ import me.lunafy.skyfall.arena.ArenaManager;
 import me.lunafy.skyfall.commands.GenerateWorld;
 import me.lunafy.skyfall.commands.Join;
 import me.lunafy.skyfall.commands.StartGame;
-import me.lunafy.skyfall.events.PlayerDeath;
+import me.lunafy.skyfall.events.PlayerDamageEvent;
 import me.lunafy.skyfall.events.PlayerDisconnect;
 import me.lunafy.skyfall.events.PlayerMove;
 import me.lunafy.skyfall.game.GameManager;
@@ -26,7 +26,7 @@ public final class Skyfall extends JavaPlugin {
 
         // Register Events
         getServer().getPluginManager().registerEvents(new PlayerMove(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerDeath(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerDamageEvent(this), this);
         getServer().getPluginManager().registerEvents(new PlayerDisconnect(this), this);
 
         // Register Commands

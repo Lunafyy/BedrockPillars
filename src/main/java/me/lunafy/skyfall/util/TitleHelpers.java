@@ -34,4 +34,17 @@ public final class TitleHelpers {
                 )
         );
     }
+
+    public static Title winnerTitle(String winnerName)
+    {
+        return Title.title(
+              StringHelpers.format("<gold><bold>VICTORY</bold></gold>"),
+              StringHelpers.format("<yellow>" + winnerName + "</yellow>"),
+              Title.Times.times(
+                      Duration.ZERO,
+                      Duration.ofSeconds(4),
+                      Duration.ofSeconds(1)
+              )
+        );
+    }
 }

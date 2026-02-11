@@ -1,6 +1,7 @@
 package me.lunafy.skyfall.player;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -65,4 +66,21 @@ public class PlayerManager {
             player.sendMessage(message);
         }
     }
+
+    public void resetPlayers() {
+        for (SkyfallPlayer sfPlayer : players.values()) {
+            Player p = sfPlayer.getBukkitPlayer();
+            if (p == null) continue;
+
+            p.getInventory().clear();
+            p.clearActivePotionEffects();
+            p.setFireTicks(0);
+            p.setGameMode(GameMode.SURVIVAL);
+            p.setHealth(20.0);
+            p.setFoodLevel(20);
+        }
+
+        players.clear();
+    }
+
 }

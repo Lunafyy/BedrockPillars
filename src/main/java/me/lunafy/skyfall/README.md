@@ -7,7 +7,8 @@
 - Fix spectator spawns so that they spawn in the game world [MEDIUM]
 - Add a death ding sound [LOW]
 - Edge-case testing for things such as people leaving [MEDIUM]
-  - Account for reconnects too by counting them as "dead"
 - Minimum player count before game starts (e.g: cancel countdown if <2 players)
+- Track killers via the SkyfallPlayer object [MEDIUM]
+- Make world folder handling async [MEDIUM]
 - Code review [HIGH]
 - Beta Test [HIGH]

@@ -35,7 +35,7 @@ public class ArenaManager {
         // Delete the existing world
         if(worldFolder.exists())
         {
-            World skyfallArena = Bukkit.getWorld("SkyfallArean");
+            World skyfallArena = Bukkit.getWorld("SkyfallArena");
 
             if(skyfallArena != null)
             {
@@ -109,5 +109,12 @@ public class ArenaManager {
     public World getArenaWorld()
     {
         return arenaWorld;
+    }
+
+    public void resetArena()
+    {
+        evacuateWorld(arenaWorld);
+        pillars.clear();
+        arenaWorld = null;
     }
 }

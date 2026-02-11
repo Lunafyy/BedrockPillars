@@ -112,15 +112,23 @@ public class GameManager {
 
     public void endMatch(SkyfallPlayer winner)
     {
+        state = GameState.ENDING;
+
         if(winner != null)
         {
-            playerManager.announceMessage(StringHelpers.format(
-                    "<gold>" + winner.getBukkitPlayer().getName() + "</gold>"
-                    + "<green> is the winner!</green>"
-            ));
+            String winnerName = winner.getBukkitPlayer().getName();
+
+            for(SkyfallPlayer sfPlayer : playerManager.getPlayers())
+            {
+                Player player = sfPlayer.getBukkitPlayer();
+                if(player == null) continue; // Disconnected players
+
+                player.showTitle(TitleHelpers.winnerTitle(winnerName));
+            }
+
+            Bukkit.getScheduler().runTaskLater(plugin, this::cleanup, 100L);
         }
-        state = GameState.ENDING;
-        // announce winner
+
         // cleanup
         state = GameState.IDLE;
     }
@@ -178,5 +186,26 @@ public class GameManager {
     public GameState getState()
     {
         return state;
+    }
+
+    public void cleanup()
+    {
+        if(countdownTask != null)
+        {
+            countdownTask.cancel();
+            countdownTask = null;
+        }
+
+        if(itemDistributor != null)
+        {
+            itemDistributor.stop();
+        }
+
+        countdown = 15;
+
+        state = GameState.IDLE;
+
+        playerManager.resetPlayers();
+        arenaManager.resetArena();
     }
 }
