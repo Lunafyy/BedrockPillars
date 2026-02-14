@@ -1,7 +1,9 @@
 package me.lunafy.skyfall.commands;
 
 import me.lunafy.skyfall.Skyfall;
+import me.lunafy.skyfall.game.GameManager;
 import me.lunafy.skyfall.game.GameState;
+import me.lunafy.skyfall.player.PlayerManager;
 import me.lunafy.skyfall.util.SkyfallErrors;
 import me.lunafy.skyfall.util.StringHelpers;
 import org.bukkit.command.Command;
@@ -11,11 +13,13 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class Join implements CommandExecutor {
-    private final Skyfall plugin;
+    private final GameManager gameManager;
+    private final PlayerManager playerManager;
 
     public Join(Skyfall plugin)
     {
-        this.plugin = plugin;
+        this.gameManager = plugin.getGameManager();
+        this.playerManager = plugin.getPlayerManager();
     }
 
     @Override
@@ -26,19 +30,25 @@ public class Join implements CommandExecutor {
             return true;
         }
 
-        if(plugin.getGameManager().getState() != GameState.LOBBY_COUNTDOWN)
+        if(gameManager.getState() == GameState.IDLE)
+        {
+            player.sendMessage(SkyfallErrors.NO_ACTIVE_GAME.component());
+            return true;
+        }
+
+        if(gameManager.getState() != GameState.LOBBY_COUNTDOWN)
         {
             player.sendMessage(SkyfallErrors.GAME_ALREADY_RUNNING.component());
             return true;
         }
 
-        if(plugin.getPlayerManager().hasPlayer(player))
+        if(playerManager.hasPlayer(player))
         {
             player.sendMessage(SkyfallErrors.ALREADY_IN_QUEUE.component());
             return true;
         }
 
-        plugin.getPlayerManager().addPlayer(player);
+        playerManager.addPlayer(player);
 
         player.sendMessage(StringHelpers.format("<green>You have been added to the Skyfall game!</green>"));
 

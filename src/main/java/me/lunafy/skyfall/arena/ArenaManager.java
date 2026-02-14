@@ -18,14 +18,21 @@ public class ArenaManager {
     private World arenaWorld;
     private final List<Location> pillars = new ArrayList<>();
 
-    private void evacuateWorld(World world)
+    public void evacuateWorld(World world)
     {
-        World lobby = Bukkit.getWorld("world");
+        if(world == null) return;
+
+        World lobby = getDefaultWorld();
 
         for(Player player : world.getPlayers())
         {
             player.teleport(lobby.getSpawnLocation());
         }
+    }
+
+    public World getDefaultWorld()
+    {
+        return Bukkit.getWorld("world");
     }
 
     public void generateArena(int playerCount)
@@ -68,6 +75,8 @@ public class ArenaManager {
         arenaWorld.setGameRule(GameRules.ADVANCE_TIME, false);
         arenaWorld.setGameRule(GameRules.ADVANCE_WEATHER, false);
 
+        arenaWorld.setDifficulty(Difficulty.HARD);
+
         arenaWorld.setTime(1000);
 
         double radius = calculateRadius(playerCount);
@@ -90,7 +99,7 @@ public class ArenaManager {
 
     private double calculateRadius(int playerCount)
     {
-        return Math.max(5, playerCount * 3);
+        return Math.max(5, playerCount * 3) * 2;
     }
 
     private void generatePillar(Location loc)

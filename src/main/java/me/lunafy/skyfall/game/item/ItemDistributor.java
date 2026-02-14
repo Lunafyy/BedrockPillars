@@ -1,5 +1,6 @@
 package me.lunafy.skyfall.game.item;
 
+import io.papermc.paper.inventory.ItemRarity;
 import me.lunafy.skyfall.Skyfall;
 import me.lunafy.skyfall.player.PlayerManager;
 import me.lunafy.skyfall.player.SkyfallPlayer;
@@ -18,15 +19,15 @@ public class ItemDistributor {
     private final PlayerManager playerManager;
     private BukkitTask task;
 
-    private static final long INTERVAL_TICKS = 20L * 5;
+    private static final long INTERVAL_TICKS = 20L * 1;
     private final Random random = new Random();
 
-    private static final List<Material> MATERIALS =
-            Arrays.stream(Material.values())
-                    .filter(Material::isItem)
-                    .filter(m -> !m.isBlock()) // ← kills potted plants dead
-                    .filter(m -> m != Material.AIR)
-                    .toList();
+    private static final List<Material> MATERIALS = Arrays.stream(Material.values())
+            .filter(Material::isItem)
+            .filter(m -> !m.name().toLowerCase().contains("pot"))
+            .filter(m -> m != Material.AIR)
+            .toList();
+
 
     public ItemDistributor(Skyfall plugin)
     {

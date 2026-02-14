@@ -47,4 +47,17 @@ public final class TitleHelpers {
               )
         );
     }
+
+    public static Title drawTitle()
+    {
+        return Title.title(
+                StringHelpers.format("<bold><yellow>DRAW</yellow></bold>"),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ZERO,
+                        Duration.ofSeconds(4),
+                        Duration.ofSeconds(1)
+                )
+        );
+    }
 }

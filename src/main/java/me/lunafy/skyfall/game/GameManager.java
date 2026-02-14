@@ -8,10 +8,7 @@ import me.lunafy.skyfall.player.SkyfallPlayer;
 import me.lunafy.skyfall.util.SkyfallErrors;
 import me.lunafy.skyfall.util.StringHelpers;
 import me.lunafy.skyfall.util.TitleHelpers;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -19,8 +16,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class GameManager {
     private Skyfall plugin;
@@ -43,7 +40,7 @@ public class GameManager {
     public void prepareArena()
     {
         countdownTask.cancel();
-        state = GameState.STARTING;
+        updateState(GameState.STARTING);
 
         int playerCount = playerManager.getPlayerCount();
 
@@ -56,6 +53,13 @@ public class GameManager {
         {
             Player p = sfPlayer.getBukkitPlayer();
             if(p == null) continue;
+
+            if(p.getGameMode() == GameMode.SPECTATOR)
+            {
+                p.setSpectatorTarget(null); // Weird edge-case if a player in spectator has a target, we can't modify their state
+            }
+
+            p.setGameMode(GameMode.SURVIVAL);
 
             p.teleport(
                     spawns.get(i++)
@@ -71,7 +75,9 @@ public class GameManager {
     {
         countdownTask.cancel();
 
-        state = GameState.IN_GAME;
+        playerManager.showTitleToAll(TitleHelpers.goTitle());
+
+        updateState(GameState.IN_GAME);
 
         World arenaWorld = arenaManager.getArenaWorld();
         arenaWorld.playSound(new Location(arenaWorld, 0, 74, 0), Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f);
@@ -83,9 +89,13 @@ public class GameManager {
     {
         countdown = 5;
 
+        playerManager.resetPlayers(false);
+
         for(SkyfallPlayer sfPlayer : playerManager.getPlayers())
         {
             Player p = sfPlayer.getBukkitPlayer();
+            if(p == null) continue;
+
             p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5 * 20, 255), false);
         }
 
@@ -96,15 +106,9 @@ public class GameManager {
                 return;
             }
 
-            for(SkyfallPlayer sfPlayer : playerManager.getPlayers())
-            {
-                Player p = sfPlayer.getBukkitPlayer();
-                if(p == null) continue;
+            playerManager.showTitleToAll(TitleHelpers.countdownTitle(countdown));
 
-                p.showTitle(TitleHelpers.countdownTitle(countdown));
-            }
             // TODO: add some kind of start method that updates the gamestate, enables loot runnables, and triggers the GO title.
-
 
             countdown--;
         }, 0L, 20L);
@@ -112,36 +116,49 @@ public class GameManager {
 
     public void endMatch(SkyfallPlayer winner)
     {
-        state = GameState.ENDING;
+        if(countdownTask != null)
+        {
+            countdownTask.cancel();
+            countdownTask = null;
+        }
 
+        for(SkyfallPlayer sfPlayer : playerManager.getPlayers())
+        {
+            if(sfPlayer == null) return;
+            if(sfPlayer.getBukkitPlayer() == null) return;
+
+            Player player = sfPlayer.getBukkitPlayer();
+            if(player.getGameMode() == GameMode.SPECTATOR)
+            {
+                player.setSpectatorTarget(null);
+            }
+
+            player.clearActivePotionEffects();
+        }
+
+        updateState(GameState.ENDING);
         if(winner != null)
         {
             String winnerName = winner.getBukkitPlayer().getName();
 
-            for(SkyfallPlayer sfPlayer : playerManager.getPlayers())
-            {
-                Player player = sfPlayer.getBukkitPlayer();
-                if(player == null) continue; // Disconnected players
-
-                player.showTitle(TitleHelpers.winnerTitle(winnerName));
-            }
-
-            Bukkit.getScheduler().runTaskLater(plugin, this::cleanup, 100L);
+            playerManager.showTitleToAll(TitleHelpers.winnerTitle(winnerName));
+        } else {
+            playerManager.showTitleToAll(TitleHelpers.drawTitle());
         }
 
         // cleanup
-        state = GameState.IDLE;
+        Bukkit.getScheduler().runTaskLater(plugin, this::cleanup, 100L);
     }
 
-    public boolean beginLobbyCountdown(CommandSender starter)
+    public void beginLobbyCountdown(CommandSender starter)
     {
         if(state != GameState.IDLE)
         {
             starter.sendMessage(SkyfallErrors.GAME_ALREADY_RUNNING.component());
-            return false;
+            return;
         }
 
-        state = GameState.LOBBY_COUNTDOWN;
+        updateState(GameState.LOBBY_COUNTDOWN);
         countdown = 15;
 
         Bukkit.broadcast(
@@ -151,6 +168,13 @@ public class GameManager {
         countdownTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if(countdown == 0)
             {
+                // Check if there are at least 2 players before trying to start
+                if(playerManager.getPlayerCount() < 2)
+                {
+                    handleNotEnoughPlayers();
+                    return;
+                }
+
                 prepareArena();
                 return;
             }
@@ -165,8 +189,20 @@ public class GameManager {
             countdown--;
         }, 20L, 20L);
 
-        return true;
     }
+
+    private void handleNotEnoughPlayers() {
+        playerManager.getPlayers().stream().findFirst().ifPresent(onlyPlayer -> {
+            Player player = onlyPlayer.getBukkitPlayer();
+            if(player != null)
+            {
+                player.sendMessage(SkyfallErrors.NOT_ENOUGH_PLAYERS.component());
+            }
+        });
+
+        cleanup();
+    }
+
 
     public void checkWinConditions()
     {
@@ -180,6 +216,7 @@ public class GameManager {
 
     public void updateState(GameState newState)
     {
+        plugin.getLogger().info("Gamestate updated to: " + newState.toString());
         state = newState;
     }
 
@@ -203,9 +240,9 @@ public class GameManager {
 
         countdown = 15;
 
-        state = GameState.IDLE;
-
-        playerManager.resetPlayers();
+        playerManager.resetPlayers(true);
         arenaManager.resetArena();
+
+        updateState(GameState.IDLE);
     }
 }

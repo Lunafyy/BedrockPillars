@@ -1,7 +1,10 @@
 package me.lunafy.skyfall.player;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -67,7 +70,36 @@ public class PlayerManager {
         }
     }
 
-    public void resetPlayers() {
+    public void showTitleToAll(Title title)
+    {
+        for(SkyfallPlayer sfPlayer : this.getPlayers())
+        {
+            Player player = sfPlayer.getBukkitPlayer();
+
+            if(player == null) continue;
+
+            player.showTitle(title);
+        }
+    }
+
+    public void playSoundToAll(Sound sound)
+    {
+        playSoundToAll(sound, null);
+    }
+
+    public void playSoundToAll(Sound sound, Location origin)
+    {
+        for(SkyfallPlayer sfPlayer : players.values())
+        {
+            Player p = sfPlayer.getBukkitPlayer();
+            if(p == null) continue;
+
+            Location soundLocation = (origin != null) ? origin : p.getLocation();
+            p.playSound(soundLocation, sound, 1, 1);
+        }
+    }
+
+    public void resetPlayers(boolean clearPlayerList) {
         for (SkyfallPlayer sfPlayer : players.values()) {
             Player p = sfPlayer.getBukkitPlayer();
             if (p == null) continue;
@@ -80,7 +112,7 @@ public class PlayerManager {
             p.setFoodLevel(20);
         }
 
-        players.clear();
+        if(clearPlayerList) players.clear();
     }
 
 }

@@ -1,7 +1,9 @@
 package me.lunafy.skyfall.commands;
 
 import me.lunafy.skyfall.Skyfall;
+import me.lunafy.skyfall.game.GameState;
 import me.lunafy.skyfall.util.SkyfallErrors;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +32,15 @@ public class StartGame implements CommandExecutor {
             return true;
         }
 
+        if(plugin.getGameManager().getState() != GameState.IDLE)
+        {
+            player.sendMessage(SkyfallErrors.GAME_ALREADY_RUNNING.component());
+            return true;
+        }
+
         plugin.getPlayerManager().addPlayer(player);
+
+        plugin.getArenaManager().evacuateWorld(Bukkit.getWorld("SkyfallArena")); // If somehow someone's still in the world, get them out
 
         plugin.getGameManager().beginLobbyCountdown(player);
 

@@ -1,10 +1,10 @@
 package me.lunafy.skyfall;
 
 import me.lunafy.skyfall.arena.ArenaManager;
-import me.lunafy.skyfall.commands.GenerateWorld;
 import me.lunafy.skyfall.commands.Join;
 import me.lunafy.skyfall.commands.StartGame;
-import me.lunafy.skyfall.events.PlayerDamageEvent;
+import me.lunafy.skyfall.events.PlayerConnect;
+import me.lunafy.skyfall.events.PlayerDamage;
 import me.lunafy.skyfall.events.PlayerDisconnect;
 import me.lunafy.skyfall.events.PlayerMove;
 import me.lunafy.skyfall.game.GameManager;
@@ -26,11 +26,11 @@ public final class Skyfall extends JavaPlugin {
 
         // Register Events
         getServer().getPluginManager().registerEvents(new PlayerMove(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerDamageEvent(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerDamage(this), this);
         getServer().getPluginManager().registerEvents(new PlayerDisconnect(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerConnect(this), this);
 
         // Register Commands
-        getCommand("generate").setExecutor(new GenerateWorld(this));
         getCommand("start").setExecutor(new StartGame(this));
         getCommand("join").setExecutor(new Join(this));
 
@@ -39,7 +39,7 @@ public final class Skyfall extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        gameManager.cleanup();
     }
 
     public ArenaManager getArenaManager()

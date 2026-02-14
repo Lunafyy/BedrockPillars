@@ -10,5 +10,6 @@
 - Minimum player count before game starts (e.g: cancel countdown if <2 players)
 - Track killers via the SkyfallPlayer object [MEDIUM]
 - Make world folder handling async [MEDIUM]
+- Update Gamemode & Clear Inventory when game starts
 - Code review [HIGH]
 - Beta Test [HIGH]
