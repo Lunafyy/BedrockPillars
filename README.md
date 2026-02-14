@@ -19,3 +19,5 @@ Suggestions for gameplay ideas are encouraged via pull requests
 - Expose immutable views from [src/main/java/me/lunafy/skyfall/player/PlayerManager.java](src/main/java/me/lunafy/skyfall/player/PlayerManager.java#L27-L70) to prevent external code from holding stale collections; returning Optional for lookups also communicates that results might be absent.
 - Wire commands directly with the managers they use instead of reaching through the plugin singleton each time (e.g., pass GameManager into [src/main/java/me/lunafy/skyfall/commands/StartGame.java](src/main/java/me/lunafy/skyfall/commands/StartGame.java#L14-L43)); this clarifies dependencies and makes command handlers easier to unit test.
 - Separate arena lifecycle (load/unload) from spawn layout bookkeeping in [src/main/java/me/lunafy/skyfall/arena/ArenaManager.java](src/main/java/me/lunafy/skyfall/arena/ArenaManager.java#L21-L103); a future proof structure would let you swap arena types or run multiple arenas concurrently with minimal changes.
+
+For a prioritized engineering review and one-PR-at-a-time roadmap, see [docs/review-roadmap.md](docs/review-roadmap.md).
